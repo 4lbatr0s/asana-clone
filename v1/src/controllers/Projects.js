@@ -1,8 +1,15 @@
 import ProjectService from "../services/Projects.js";
+import httpStatus from "http-status";
 
-const create  = (req,res)=> {
-    ProjectService.insert({name:"123",lname:"2341241"});
-    res.status(200).send("Project CREATE!");
+class ProjectsController {
+    async create(req,res){
+        try {
+            const result = await ProjectService.add({name:"Project Example"});
+            res.status(httpStatus.CREATED).send(result);          
+        } catch (error) {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+        }
+    }
 }
 
-export default {create,}
+export default new ProjectsController();

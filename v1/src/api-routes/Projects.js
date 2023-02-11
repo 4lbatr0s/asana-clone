@@ -6,6 +6,6 @@ import ProjectsController from "../controllers/Projects.js";
 const router = express.Router();
 
 
-router.get("/",ProjectsController.create)
+router.post("/", ProjectsController.create)
 
 export default router;

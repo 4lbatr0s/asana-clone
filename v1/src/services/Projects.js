@@ -1,5 +1,9 @@
-const insert = (projectData) => {
-    console.log(projectData);
+import ProjectModel from "../models/Projects.js";
+import BaseService from "../services/BaseService.js";
+
+
+class ProjectService extends BaseService{
+    model = ProjectModel;
 }
 
-export default {insert,}
+export default new ProjectService();
