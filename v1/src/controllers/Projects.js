@@ -20,4 +20,11 @@ class ProjectsController {
     }
 }
 
+// class ProjectsController extends BaseController{
+    // constructor(){
+        // console.log('ProjectService:', ProjectService);
+        // super(ProjectService);
+    // }
+// }
+
 export default new ProjectsController();

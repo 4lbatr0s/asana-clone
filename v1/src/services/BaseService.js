@@ -1,18 +1,18 @@
 class BaseService{
     async findAll(){
-        return this.model.find();
+        return await this.model.find();
     }
     async add(item){
-        return this.model.create(item);
+        return await this.model.create(item);
     }
     async delete(itemId){
-        return this.model.remove({_id: itemId});
+        return await this.model.remove({_id: itemId});
     }
     async saveModel(){
-        return this.model.save();
+        return await this.model.save();
     }
     async find(itemId=1){
-        return this.model.findById(itemId);
+        return await this.model.findById(itemId);
     }
 }
 
