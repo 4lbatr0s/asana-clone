@@ -6,7 +6,7 @@ class BaseService{
         return await this.model.create(item);
     }
     async delete(itemId){
-        return await this.model.remove({_id: itemId});
+        return await this.model.findByIdAndDelete(itemId);
     }
     async saveModel(){
         return await this.model.save();

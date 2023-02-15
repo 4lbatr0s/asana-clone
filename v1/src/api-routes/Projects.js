@@ -8,4 +8,5 @@ const router = express.Router();
 router.get("/", authenticate, ProjectsController.list)
 router.route("/").post(authenticate, validate(schemas.createValidation), ProjectsController.create);
 router.route("/:id").patch(authenticate, validate(schemas.updateValidation), ProjectsController.update);
+router.route("/:id").delete(authenticate, ProjectsController.remove);
 export default router;

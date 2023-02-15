@@ -118,6 +118,17 @@ class UsersController {
             });
         }
     }
+
+    async remove(req,res){
+        try {
+            const deletedUser = await UserService.delete(req.params?.id);
+            if(!deletedUser) return res.status(httpStatus.NOT_FOUND).send({error:'Boyle bir kayit bulunmamaktadir.'});
+            console.log("deletedUser:",deletedUser);
+            res.status(httpStatus.OK).send({message:'User basariyla silindi'});
+        } catch (error) {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:'User silinirken bir hata olustu.'});
+        }
+    }
 }
 
 export default new UsersController();

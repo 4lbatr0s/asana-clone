@@ -12,6 +12,7 @@ router.route("/login").post(validate(schemas.loginValidation), UsersController.l
 router.route("/").patch(authenticate, validate(schemas.updateValidation), UsersController.update);
 router.route("/projects").get(authenticate, UsersController.projectList);
 router.route("/reset-password").post(validate(schemas.resetPasswordValidation), UsersController.resetPassword);
+router.route("/:id").delete(authenticate, UsersController.remove);
 
 
 export default router;

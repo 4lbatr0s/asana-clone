@@ -29,6 +29,16 @@ class ProjectsController {
             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:"Kayit sirasinda bir hata olustu!"});
         }
     }
+    async remove(req,res){
+        try {
+            const deletedProject = await ProjectService.delete(req.params?.id);
+            if(!deletedProject) return res.status(httpStatus.NOT_FOUND).send({error:'Boyle bir kayit bulunmamaktadir.'});
+            console.log("deletedProject:",deletedProject);
+            res.status(httpStatus.OK).send({message:'Proje basariyla silindi'});
+        } catch (error) {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:'Proje silinirken bir hata olustu.'});
+        }
+    }
 }
 
 // class ProjectsController extends BaseController{
