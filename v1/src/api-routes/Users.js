@@ -14,6 +14,7 @@ router.route("/projects").get(authenticate, UsersController.projectList);
 router.route("/reset-password").post(validate(schemas.resetPasswordValidation), UsersController.resetPassword);
 router.route("/change-password").post(authenticate, validate(schemas.changePasswordValidation), UsersController.changePassword);
 router.route("/:id").delete(authenticate, UsersController.remove);
+router.route("/update-profile-image").post(authenticate, UsersController.updateProfileImage);
 
 
 export default router;

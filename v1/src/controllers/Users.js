@@ -4,7 +4,11 @@ import Helper from '../scripts/utils/helper.js';
 import messages from '../scripts/utils/messages.js';
 import ProjectService from '../services/Projects.js';
 import eventEmitter from '../scripts/events/eventEmitter.js';
-import { request } from 'express';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);//get all name
+const __dirname = path.dirname(__filename); //get dir name from it.
 
 class UsersController {
     async create(req, res) {
@@ -129,6 +133,36 @@ class UsersController {
                 error: 'Kayit sirasinda bir hata olustu!',
             });
         }
+    }
+    
+    updateProfileImage(req,res){
+
+        const extensionName = path.extname(req.files.profile_image.name);
+        const fileName = req.user?._id+`${extensionName}`;
+        const folderPath = path.join(__dirname, "../","uploads/users", fileName);
+
+        if(!req?.files?.profile_image){
+            return res.status(httpStatus.BAD_REQUEST).send({error:'Bu islemi yapabilmek icin fotograf yuklemeniz gerekli'});
+        }
+        req.files.profile_image.mv(folderPath, async function(err){
+            if(err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:err});
+            
+            //TIP:Save to db.
+            try {
+                const updatedUser = await UserService.update({_id:req.user._id}, {profile_image:fileName});                
+                return res.status(httpStatus.OK).send({message:'Profil fotografi basariyla degistirldi', user:updatedUser});
+            } catch (error) {
+                return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({message:'Profil fotografi dbye kaydedilirken bir hata ile karsilasildi'});
+            }
+        });
+        //mv fotografin kendisinden geliyor, fotoyu bununla baska bir yere tasiyabiliriz.
+        /**
+         * 1.resim kontrolu
+         * 2.upload islemi
+         * 3.db save islemi
+         * 4.response islemi
+         */
+        
     }
 
     async remove(req,res){

@@ -13,10 +13,6 @@ class UserService extends BaseService{
         const user= await this.model.findOne({email:userEmail}); //TIP:retunrs data or returns null
         return user;
     }
-    
-    async resetPassword(userInfo){
-             
-    }
 }
 
 export default new UserService(); //INFO: we can use the "this" keywod in the BaseService, because we create object instance here.
