@@ -20,5 +20,9 @@ const resetPasswordValidation = Joi.object({
     email:Joi.string().email().required().min(8),
 }).unknown(true);
 
+const changePasswordValidation = Joi.object({
+    password:Joi.string().required().min(8),
+}).unknown(true);
 
-export default { createValidation, loginValidation, resetPasswordValidation, updateValidation};
+
+export default { createValidation, loginValidation, resetPasswordValidation, changePasswordValidation, updateValidation};

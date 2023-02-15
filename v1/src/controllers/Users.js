@@ -4,6 +4,7 @@ import Helper from '../scripts/utils/helper.js';
 import messages from '../scripts/utils/messages.js';
 import ProjectService from '../services/Projects.js';
 import eventEmitter from '../scripts/events/eventEmitter.js';
+import { request } from 'express';
 
 class UsersController {
     async create(req, res) {
@@ -89,8 +90,19 @@ class UsersController {
             });
         } catch (error) {
             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Sifre degistirilirken bir hata ile karsilasildi.',
+                error: 'Sifre sifirlanirken bir hata ile karsilasildi.',
             });
+        }
+    }
+
+    async changePassword(req,res){
+        //TODO: UI'dan sonra eski-yeni sifre karsilastirmasi eklenmeli.
+        req.body.password = Helper.passwordToHash(req.body?.password);
+        try {
+           const updatedUser = await UserService.update({_id:req.user?._id}, req.body);
+           res.status(httpStatus.OK).send(updatedUser);   
+        } catch (error) {
+           res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:'Sifre degisitirilirken bir hata ile karsilasildi.'});   
         }
     }
 
