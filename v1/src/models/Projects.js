@@ -3,10 +3,10 @@ import logger from "../scripts/logger/Projects.js";
 
 const ProjectSchema = new Mongoose.Schema({
     name:String,
-    // user_id:{  //TIP: How to reference a foreign key!
-        // type:Mongoose.Types.ObjectId,
-        // ref:"user"
-    // }
+    user_id:{  //TIP: How to reference a foreign key!
+        type:Mongoose.Types.ObjectId,
+        ref:"user"
+    }
 }, {timestamps:true, versionKey:false})
 
 //INFO: Mongoose hooks: they're middlewares.

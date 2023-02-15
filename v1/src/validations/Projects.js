@@ -5,5 +5,9 @@ const createValidation = Joi.object({
     name:Joi.string().required().min(5),
 }).unknown(true);
 
+const updateValidation = Joi.object({
+    name:Joi.string().required().min(5),
+}).unknown(true);
 
-export default { createValidation,}
+
+export default { createValidation, updateValidation}
