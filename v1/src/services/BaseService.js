@@ -1,5 +1,5 @@
 class BaseService{
-    async findAll(){
+    async findAll(where){
         return await this.model.find(where || {}); //TIP: with where, we can use filters for lists(bring with user id etc..)
     }
     async add(item){
