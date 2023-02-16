@@ -61,6 +61,22 @@ class SectionsController {
         }
     }
 
+    async getSectionById(req, res) {
+        if(!req.params?.sectionId) return res.status(httpStatus.BAD_REQUEST).send({error:'Section bilgisi eksik!'});
+        try {
+            
+            const project = await SectionService.find(req.params.sectionId);
+            if(!project){
+                return res.status(httpStatus.NOT_FOUND).send({error:'Bu idye sahip bir section yok'});
+            }
+            const result = await SectionService.find({_id:req.params.sectionId});
+            res.status(httpStatus.OK).send(result);
+        } catch (error) {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+        }
+    }
+
+
     async update(req, res) {
         try {
             if (!req.params.id) {

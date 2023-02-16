@@ -14,7 +14,7 @@ const authenticateToken = (req,res,next)=>{
          * This way, we can do operations on the user.
          */
         req.user = user; 
-        next();
+            next();
     });
 }
 

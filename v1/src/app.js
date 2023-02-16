@@ -25,7 +25,7 @@ app.use(fileUpload()); //TIP:When you upload a file, the file will be accessible
 loadRoutes(app); //import route usings from another module.
 
 app.listen(process.env.APP_PORT, ()=>{ 
-    console.log("server is listening on port " + process.env.APP_PORT);
+console.log("server is listening on port " + process.env.APP_PORT);
 })
 
 

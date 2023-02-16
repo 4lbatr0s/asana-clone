@@ -11,7 +11,7 @@ router.get("/:projectId", authenticate, SectionsController.listByProject);
 router.route("/").post(authenticate, validate(schemas.createValidation), SectionsController.create);
 router.route("/:id").patch(authenticate, validate(schemas.updateValidation), SectionsController.update);
 router.route("/:id").delete(authenticate, SectionsController.remove);
-
+router.route("/getbyid/:sectionId").get(authenticate, SectionsController.getSectionById);
 
 
 export default router;

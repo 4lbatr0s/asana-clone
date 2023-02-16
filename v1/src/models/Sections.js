@@ -11,6 +11,12 @@ const SectionSechema = new Mongoose.Schema({
         type:Mongoose.Types.ObjectId,
         ref:"project"
     },
+    tasks:[
+        {
+            type:Mongoose.Types.ObjectId,
+            ref:"task"
+        }
+    ],
     order:Number
 
 }, {timestamps:true, versionKey:false})
