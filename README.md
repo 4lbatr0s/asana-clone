@@ -53,7 +53,7 @@ You can send HTTP requests to the server to create, read, update, and delete pro
 - `POST /users/update-profile-image`: Updates the authenticated user's profile image. Requires authentication. The request body should contain a multipart/form-data object with the image file.
 
 ## Collection Relations
-![DB Connections](/home/serhatoner/Coding/asana-clone/DB.png)
+![Alt Text](/home/serhatoner/Coding/asana-clone/DB.png)
 
 ## Contributing
 
