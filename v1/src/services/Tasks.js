@@ -1,3 +1,4 @@
+import { request } from "express";
 import httpStatus from "http-status";
 import TaskModel from "../models/Tasks.js";
 import BaseService from "../services/BaseService.js";
@@ -34,8 +35,23 @@ class TaskService extends BaseService{
                 error: 'Yorum silme sirasinda bir hata olustu!',
             });
         }
-    }
+    };
 
+    async addSubTask(req,res, next){
+        if(!req.params.taskId) return res.status(httpStatus.BAD_REQUEST).send({error:'Task id is required'});
+        try {
+            const mainTask = await this.find(req.params.taskId);
+            if(!mainTask) return res.status(httpStatus.NOT_FOUND).send({error:'Task not found'});
+            req.body.user_id = req.user._id;
+            const subTask = await this.add(req.body.user);
+            mainTask.sub_tasks.push(subTask); //TIP: It will only take the Object id of the subTask! thanks the way we created task model.
+            mainTask.save();
+            return mainTask;
+        } catch (error) {
+            return next(error);
+        }
+    };
+    
 }
 
 export default new TaskService();

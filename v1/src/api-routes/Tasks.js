@@ -13,6 +13,7 @@ router.route("/:id").patch(authenticate, validate(schemas.updateValidation), Tas
 router.route("/:id").delete(authenticate, TasksController.remove);
 router.route("/:taskId/make-comment").patch(authenticate, validate(schemas.commentValidation), TasksController.makeComment);
 router.route("/:taskId/:commentId").delete(authenticate, TasksController.deleteCommand);
+router.route("/:taskId/add-sub-task").post(authenticate, validate(schemas.createValidation), TasksController.addSubTask);
 
 
 export default router;

@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import TaskService from '../services/Tasks.js';
 import ProjectService from '../services/Projects.js';
+import globalErrorHandler from "../middlewares/error.js";
 
 class TasksController {
     async index(req, res) {
@@ -126,6 +127,13 @@ class TasksController {
         }
     }
 
+    async addSubTask(req,res){
+        try {
+            const result = await TaskService.addSubTask(req,res,globalErrorHandler)
+        } catch (error) {
+            
+        }
+    }
 }
 
 export default new TasksController();

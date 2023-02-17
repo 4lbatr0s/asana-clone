@@ -53,6 +53,17 @@ class ProjectsController {
             });
         }
     }
+
+    async findById(req,res,next){
+        if(!req.params?.projectId) return res.status(httpStatus.BAD_REQUEST).send({message:'Project id is required'});
+        try {
+            const project = await ProjectService.find(req.params.projectId);
+            if(!project) return res.status(httpStatus.NOT_FOUND).send({message:'Project not found'});
+            return res.status(httpStatus.OK).send(project);
+        } catch (error) {
+            return next(error);
+        }
+    };
 }
 
 // class ProjectsController extends BaseController{
