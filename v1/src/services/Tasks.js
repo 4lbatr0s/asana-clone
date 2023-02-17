@@ -7,6 +7,29 @@ import BaseService from "../services/BaseService.js";
 class TaskService extends BaseService{
     model = TaskModel;
 
+    //TIP: override method.
+    //INFO: HOW TO USE POPULATE WITH EXPAND!
+    async find(itemId=1, expand=false){
+        if(!expand)
+            return await this.model.findById(itemId);
+        return await this.model.findById(itemId)
+        .populate({
+            path:"user_id",
+            select:"full_name email profile_image"
+        })
+        .populate({
+            path:"comments",
+            populate:{  //INFO: HOW TO NESTED POPULATE THE OBJECTS!
+                path:"user_id",
+                select:"full_name email profile_image"
+            }
+        })
+        .populate({
+            path:"sub_tasks",
+            select:"title description isCompleted assigned_to due_date order subtasks statuses"
+        })
+    }
+
     async makeComment(reqValues,resValues){
         const task = await this.find(reqValues.params.taskId);
         if(!task) return resValues.status(httpStatus.NOT_FOUND).send({error:'Verilen id ile eslesen bir task yok.'});
@@ -43,7 +66,7 @@ class TaskService extends BaseService{
             const mainTask = await this.find(req.params.taskId);
             if(!mainTask) return res.status(httpStatus.NOT_FOUND).send({error:'Task not found'});
             req.body.user_id = req.user._id;
-            const subTask = await this.add(req.body.user);
+            const subTask = await this.add(req.body);
             mainTask.sub_tasks.push(subTask); //TIP: It will only take the Object id of the subTask! thanks the way we created task model.
             mainTask.save();
             return mainTask;
@@ -51,6 +74,18 @@ class TaskService extends BaseService{
             return next(error);
         }
     };
+
+    async getTask(req,res,next){
+        if(!req.params.taskId) return res.status(httpStatus.BAD_REQUEST).send({error:'Task id is required'});
+        try {
+            const mainTask = await this.find(req.params.taskId, true);
+            if(!mainTask) return res.status(httpStatus.NOT_FOUND).send({error:'Task not found'});
+            return mainTask;
+        } catch (error) {
+            return next(error);
+        }
+
+    }
     
 }
 

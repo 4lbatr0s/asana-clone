@@ -129,9 +129,19 @@ class TasksController {
 
     async addSubTask(req,res){
         try {
-            const result = await TaskService.addSubTask(req,res,globalErrorHandler)
+            const result = await TaskService.addSubTask(req,res,globalErrorHandler);
+            return res.status(httpStatus.OK).send(result);
         } catch (error) {
-            
+            return next(error);
+        }
+    }
+
+    async getTask(req,res){
+        try {
+            const result = await TaskService.getTask(req,res,globalErrorHandler);
+            return res.status(httpStatus.OK).send(result);
+        } catch (error) {
+            return next(error);
         }
     }
 }
