@@ -52,6 +52,19 @@ You can send HTTP requests to the server to create, read, update, and delete pro
 - `DELETE /users/:id`: Deletes the user with the specified `id`. Requires authentication.
 - `POST /users/update-profile-image`: Updates the authenticated user's profile image. Requires authentication. The request body should contain a multipart/form-data object with the image file.
 
+### Tasks
+
+- `GET /tasks/index`: Returns a HTML page that displays a list of all available endpoints and their methods.
+- `GET /tasks`: Returns a list of all tasks.
+- `GET /tasks/`:projects/projectId: Returns a list of all tasks that belong to the project with the specified project ID.
+- `POST /tasks:` Creates a new task.
+- `POST /tasks/:taskId/add-sub-task:` Creates a new sub-task for the task with the specified task ID.
+- `PATCH /tasks/:id:` Updates the task with the specified ID.
+- `PATCH /tasks/:taskId/make-comment:` Adds a comment to the task with the specified task ID.
+- `DELETE /tasks/:id:` Deletes the task with the specified ID.
+- `DELETE /tasks/:taskId/:commentId:` Deletes the comment with the specified comment ID from the task with the specified task ID.
+- `GET /tasks/:taskId:` Returns the task with the specified task ID.
+
 ## Collection Relations
 ![Alt Text](/home/serhatoner/Coding/asana-clone/DB.png)
 
