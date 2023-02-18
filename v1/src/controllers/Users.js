@@ -6,38 +6,38 @@ import ProjectService from '../services/Projects.js';
 import eventEmitter from '../scripts/events/eventEmitter.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import ApiError from '../errors/ApiError.js';
+import ApiNotFoundError from '../errors/ApiNotFoundError.js';
 
 const __filename = fileURLToPath(import.meta.url);//get all name
 const __dirname = path.dirname(__filename); //get dir name from it.
 
 class UsersController {
-    async create(req, res) {
+    async create(req, res, next) {
         req.body.password = Helper.passwordToHash(req.body.password);
         try {
             const result = await UserService.add(req.body);
             //TODO: do not return password.
             res.status(httpStatus.CREATED).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode))
         }
     }
 
-    async list(req, res) {
+    async list(req, res, next) {
         try {
             const result = await UserService.findAll();
             res.status(httpStatus.OK).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode))
         }
     }
 
-    async login(req, res) {
+    async login(req, res, next) {
         try {
             let user = await UserService.loginUser(req.body.email);
             if (!user)
-                return res
-                    .status(httpStatus.UNAUTHORIZED)
-                    .send({ message: messages.ERROR.USER_NOT_FOUND });
+                return next(new ApiNotFoundError());
             const hashedPassword = Helper.passwordToHash(req.body.password);
             if (hashedPassword.toString() !== user.password)
                 return res
@@ -54,7 +54,7 @@ class UsersController {
             delete user.password; //TIP: do not return password.
             return res.status(httpStatus.OK).send(user);
         } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
@@ -62,7 +62,7 @@ class UsersController {
      *
      * @returns Projects with the user id that sent the request.
      */
-    async projectList(req, res) {
+    async projectList(req, res, next) {
         req.user?.id;
         try {
             const projects = await ProjectService.findAll({
@@ -70,13 +70,11 @@ class UsersController {
             });
             res.status(httpStatus.OK).send(projects);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Projeleri getirirken beklenmedik bir hata olustu.',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
-    async resetPassword(req, res) {
+    async resetPassword(req, res, next) {
         try {
             const newPassword = Helper.createPassword();
             const updatedUser = await UserService.update(
@@ -93,24 +91,22 @@ class UsersController {
                     'Sifre sifirlama islemi icin sisteme kayitli e-posta adresinize gereken bilgileri gonderdik.',
             });
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Sifre sifirlanirken bir hata ile karsilasildi.',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
-    async changePassword(req,res){
+    async changePassword(req,res, next){
         //TODO: UI'dan sonra eski-yeni sifre karsilastirmasi eklenmeli.
         req.body.password = Helper.passwordToHash(req.body?.password);
         try {
            const updatedUser = await UserService.update({_id:req.user?._id}, req.body);
            res.status(httpStatus.OK).send(updatedUser);   
         } catch (error) {
-           res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:'Sifre degisitirilirken bir hata ile karsilasildi.'});   
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
-    async update(req, res) {
+    async update(req, res, next) {
         // if(req.body?.password) delete req.body.password; //TIP: We don't want client to include password data to update.
         //or we can do it with reduce.
         const updateData = Object.keys(req.body).reduce(
@@ -129,30 +125,26 @@ class UsersController {
             );
             res.status(httpStatus.OK).send(updatedUser);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Kayit sirasinda bir hata olustu!',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
     
-    updateProfileImage(req,res){
-
+    updateProfileImage(req,res, next){
         const extensionName = path.extname(req.files.profile_image.name);
         const fileName = req.user?._id+`${extensionName}`;
         const folderPath = path.join(__dirname, "../","uploads/users", fileName);
 
         if(!req?.files?.profile_image){
-            return res.status(httpStatus.BAD_REQUEST).send({error:'Bu islemi yapabilmek icin fotograf yuklemeniz gerekli'});
+            return next(new ApiError('You need to upload an image to change your profile picture.', httpStatus.BAD_REQUEST));
         }
-        req.files.profile_image.mv(folderPath, async function(err){
-            if(err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error:err});
-            
+        req.files.profile_image.mv(folderPath, async function(error){
+            if(error) return next(new ApiError(error?.message, error?.statusCode));
             //TIP:Save to db.
             try {
                 const updatedUser = await UserService.update({_id:req.user._id}, {profile_image:fileName});                
                 return res.status(httpStatus.OK).send({message:'Profil fotografi basariyla degistirldi', user:updatedUser});
             } catch (error) {
-                return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({message:'Profil fotografi dbye kaydedilirken bir hata ile karsilasildi'});
+                return next(new ApiError('Profil fotografi dbye kaydedilirken bir hata ile karsilasildi'));
             }
         });
         //mv fotografin kendisinden geliyor, fotoyu bununla baska bir yere tasiyabiliriz.
@@ -165,7 +157,7 @@ class UsersController {
         
     }
 
-    async remove(req,res){
+    async remove(req,res, next){
         try {
             const deletedUser = await UserService.delete(req.params?.id);
             if(!deletedUser) return res.status(httpStatus.NOT_FOUND).send({error:'Boyle bir kayit bulunmamaktadir.'});

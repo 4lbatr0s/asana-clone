@@ -1,38 +1,34 @@
 import httpStatus from 'http-status';
 import TaskService from '../services/Tasks.js';
 import ProjectService from '../services/Projects.js';
-import globalErrorHandler from "../middlewares/error.js";
+import ApiError from '../errors/ApiError.js';
+import ApiNotFoundError from '../errors/ApiNotFoundError.js';
 
 class TasksController {
     async index(req, res) {
         return res.status(httpStatus.OK).send({ message: 'sections...' });
     }
 
-    async create(req, res) {
+    async create(req, res, next) {
         req.body.user_id = req.user._id;
         try {
             const result = await TaskService.add(req.body);
             res.status(httpStatus.CREATED).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(`An error occurred while creating the task`, httpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 
-    async remove(req, res) {
+    async remove(req, res,next) {
         try {
             const deletedTask = await TaskService.delete(req.params?.id);
             if (!deletedTask)
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ error: 'Boyle bir kayit bulunmamaktadir.' });
-            console.log('deletedTask:', deletedTask);
+                return next(new ApiNotFoundError());
             res.status(httpStatus.OK).send({
                 message: 'Task basariyla silindi',
             });
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Task silinirken bir hata olustu.',
-            });
+            return next(new ApiError(`An error occurred while deleting the task`, httpStatus.INTERNAL_SERVER_ERROR));        
         }
     }
 
@@ -41,107 +37,84 @@ class TasksController {
             const result = await TaskService.findAll();
             res.status(httpStatus.OK).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(`An error occurred while fetching the tasks`, httpStatus.INTERNAL_SERVER_ERROR));        
         }
     }
 
-    async listByProject(req, res) {
-        if (!req.params?.projectId)
-            return res
-                .status(httpStatus.BAD_REQUEST)
-                .send({ error: 'Proje bilgisi eksik!' });
+    async listByProject(req, res, next) {
         try {
             const project = await ProjectService.find(req.params.projectId);
             if (!project) {
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ error: 'Bu idye sahip bir project yok' });
+                return next(new ApiNotFoundError());
             }
             const result = await TaskService.listByProject({
                 project_id: req.params.projectId,
             });
             res.status(httpStatus.OK).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode));                
         }
     }
 
-    async listBySection(req, res) {
-        if (!req.params?.projectId)
-            return res
-                .status(httpStatus.BAD_REQUEST)
-                .send({ error: 'Proje bilgisi eksik!' });
+    async listBySection(req, res, next) {
         try {
             const project = await ProjectService.find(req.params.projectId);
             if (!project) {
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ error: 'Bu idye sahip bir project yok' });
+                return next(new ApiNotFoundError());
             }
             const result = await TaskService.listByProject({
                 project_id: req.params.projectId,
             });
             res.status(httpStatus.OK).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode));                
         }
     }
 
-    async update(req, res) {
+    async update(req, res, next) {
         try {
-            if (!req.params.id) {
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ message: 'ID bilgisi eksik' });
-            }
             const updatedTask = await TaskService.update(
                 req.params.id,
                 req.body
             );
             res.status(httpStatus.OK).send(updatedTask);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Kayit sirasinda bir hata olustu!',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
-    async makeComment(req, res) {
+    async makeComment(req, res, next) {
         try {
             const updatedTask = await TaskService.makeComment(req,res);
             return res.status(httpStatus.OK).send(updatedTask);
         } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Kayit sirasinda bir hata olustu!',
-            });
+            return next(new ApiError(error?.message, error?.statusCode))
         }
     }
 
-    async deleteCommand(req, res) {
+    async deleteCommand(req, res, next) {
         try {
             await TaskService.deleteComment(req,res);
         } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Yorum silme sirasinda bir hata olustu!',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     }
 
-    async addSubTask(req,res){
+    async addSubTask(req,res, next){
         try {
-            const result = await TaskService.addSubTask(req,res,globalErrorHandler);
+            const result = await TaskService.addSubTask(req,res,new ApiError);
             return res.status(httpStatus.OK).send(result);
         } catch (error) {
-            return next(error);
+            return next(new ApiError(error?.message, error?.statusCode));                                                                        
         }
     }
 
-    async getTask(req,res){
+    async getTask(req,res, next){
         try {
-            const result = await TaskService.getTask(req,res,globalErrorHandler);
+            const result = await TaskService.getTask(req);
             return res.status(httpStatus.OK).send(result);
         } catch (error) {
-            return next(error);
+            return next(new ApiError(error?.message, error?.statusCode));                                    
         }
     }
 }

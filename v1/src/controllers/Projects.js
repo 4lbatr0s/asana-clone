@@ -1,76 +1,60 @@
 import ProjectService from '../services/Projects.js';
 import httpStatus from 'http-status';
+import globalErrorHandler from '../middlewares/error.js';
+import ApiError from '../errors/ApiError.js';
+import ApiNotFoundError from '../errors/ApiNotFoundError.js';
 class ProjectsController {
-    async create(req, res) {
+    async create(req, res, next) {
         req.body.user_id = req.user._id;
         try {
             const result = await ProjectService.add(req.body);
             res.status(httpStatus.CREATED).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode));                                    
         }
     }
-    async list(req, res) {
+    async list(req, res,next) {
         try {
             const result = await ProjectService.findAll();
             res.status(httpStatus.OK).send(result);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error);
+            return next(new ApiError(error?.message, error?.statusCode));                                    
         }
     }
-    async update(req, res) {
+
+    async update(req, res, next) {
         try {
-            if (!req.params.id) {
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ message: 'ID bilgisi eksik' });
-            }
             const updatedProject = await ProjectService.update(
                 req.params.id,
                 req.body
             );
             res.status(httpStatus.OK).send(updatedProject);
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Kayit sirasinda bir hata olustu!',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));                                    
         }
     }
-    async remove(req, res) {
+    async remove(req, res,next) {
         try {
             const deletedProject = await ProjectService.delete(req.params?.id);
             if (!deletedProject)
-                return res
-                    .status(httpStatus.NOT_FOUND)
-                    .send({ error: 'Boyle bir kayit bulunmamaktadir.' });
-            console.log('deletedProject:', deletedProject);
+                return next(new ApiNotFoundError());
             res.status(httpStatus.OK).send({
-                message: 'Proje basariyla silindi',
+                message: 'Project deleted successfully',
             });
         } catch (error) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: 'Proje silinirken bir hata olustu.',
-            });
+            return next(new ApiError(error?.message, error?.statusCode));                                    
         }
     }
 
     async findById(req,res,next){
-        if(!req.params?.projectId) return res.status(httpStatus.BAD_REQUEST).send({message:'Project id is required'});
         try {
             const project = await ProjectService.find(req.params.projectId);
-            if(!project) return res.status(httpStatus.NOT_FOUND).send({message:'Project not found'});
+            if(!project) return next(new ApiNotFoundError());
             return res.status(httpStatus.OK).send(project);
         } catch (error) {
-            return next(error);
+            return next(new ApiError(error?.message, error?.statusCode));
         }
     };
 }
-
-// class ProjectsController extends BaseController{
-// constructor(){
-// console.log('ProjectService:', ProjectService);
-// super(ProjectService);
-// }
-// }
 
 export default new ProjectsController();
